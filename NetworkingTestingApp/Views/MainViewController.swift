@@ -55,10 +55,14 @@ private extension MainViewController {
         }
     }
     
-    private func onErrorReceived(error: Error) {
+    private func onErrorReceived(error: NetworkServiceError) {
         DispatchQueue.main.async { [weak self] in
-            self?.tempLabel.text = "Error"
-            print(error)
+            switch error {
+            case .notFound:
+                self?.tempLabel.text = "Not found"
+            default:
+                self?.tempLabel.text = "Error"
+            }
         }
     }
 }
