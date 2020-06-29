@@ -45,7 +45,7 @@ enum CharacterProvider {
     
     enum CurrentWeather: URLRequestBuilder {
         case byCityName(name: String)
-        case byCoordinates(lat: Int, lon: Int)
+        case byCoordinates(lat: Double, lon: Double)
         
         var path: String {
             return "data/2.5/weather"

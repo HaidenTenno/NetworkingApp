@@ -8,7 +8,7 @@
 
 import Foundation
 
-class PlistParser {
+final class PlistParser {
     
     public static var apiKey: String {
         guard let result = getStringValue(for: Config.KeysPlist.apiKey) else { fatalError() }
