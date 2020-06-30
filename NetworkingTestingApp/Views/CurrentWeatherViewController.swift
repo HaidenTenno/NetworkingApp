@@ -1,5 +1,5 @@
 //
-//  MainViewController.swift
+//  CurrentWeatherViewController.swift
 //  templateApp
 //
 //  Created by Петр Тартынских  on 29.06.2020.
@@ -10,7 +10,7 @@ import UIKit
 import SnapKit
 import CoreLocation
 
-class MainViewController: UIViewController {
+class CurrentWeatherViewController: UIViewController {
     
     // UI
     private var tempLabel: UILabel!
@@ -44,7 +44,7 @@ class MainViewController: UIViewController {
 }
 
 // MARK: - Private
-private extension MainViewController {
+private extension CurrentWeatherViewController {
     
     private func requestLocation() {
         activityIndicator.startAnimating()
@@ -101,11 +101,11 @@ private extension MainViewController {
 }
 
 // MARK: - UI
-private extension MainViewController {
+private extension CurrentWeatherViewController {
     
     private func setupView() {
         // self
-        view.backgroundColor = Design.Colors.redColor
+        view.backgroundColor = Design.Colors.red
         
         // tempLabel
         tempLabel = UILabel()
@@ -136,7 +136,7 @@ private extension MainViewController {
 }
 
 // MARK: - CLLocationManagerDelegate
-extension MainViewController: CLLocationManagerDelegate {
+extension CurrentWeatherViewController: CLLocationManagerDelegate {
     
     func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
         guard status != .denied else {

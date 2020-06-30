@@ -18,7 +18,7 @@ final class ViewsCoordinator {
     }
     
     func start() {
-        presentScreen()
+        presentTabBarController()
     }
 }
 
@@ -26,14 +26,48 @@ final class ViewsCoordinator {
 private extension ViewsCoordinator {
     
     // MARK: - Creators
-    private func createMainVC() -> MainViewController {
-        let mainVC = MainViewController()
-        return mainVC
+    private func createCurrentWeatherVC() -> CurrentWeatherViewController {
+        let currentWeatherVC = CurrentWeatherViewController()
+        
+        let tabBarItem = UITabBarItem()
+        tabBarItem.image = UIImage(systemName: Design.Images.sun)?
+        .withRenderingMode(.automatic)
+        currentWeatherVC.tabBarItem = tabBarItem
+        
+        return currentWeatherVC
+    }
+    
+    private func createForecastWeatherVC() -> ForecastWeatherViewController {
+        let forecastWeatherVC = ForecastWeatherViewController()
+        
+        let tabBarItem = UITabBarItem()
+        tabBarItem.image = UIImage(systemName: Design.Images.calendar)?
+        .withRenderingMode(.automatic)
+        forecastWeatherVC.tabBarItem = tabBarItem
+        
+        return forecastWeatherVC
     }
     
     // MARK: - Presetners
-    private func presentScreen() {
-        let mainVC = createMainVC()
-        navigationController.pushViewController(mainVC, animated: true)
+    
+    private func presentTabBarController() {
+        let currentWeatherVC = createCurrentWeatherVC()
+        let forecastWeatherVC = createForecastWeatherVC()
+        
+        let tabBarController = UITabBarController()
+        tabBarController.viewControllers = [currentWeatherVC, forecastWeatherVC]
+        tabBarController.selectedViewController = currentWeatherVC
+        
+        navigationController.pushViewController(tabBarController, animated: true)
+    }
+    
+    private func presentCurrentWeatherScreen() {
+        let currentWeatherVC = createCurrentWeatherVC()
+        navigationController.pushViewController(currentWeatherVC, animated: true)
+    }
+    
+    private func presentForecastWeatherScreen() {
+        let forecastWeatherVC = createForecastWeatherVC()
+        navigationController.pushViewController(forecastWeatherVC, animated: true)
     }
 }

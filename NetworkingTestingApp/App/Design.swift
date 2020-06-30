@@ -11,7 +11,8 @@ import UIKit
 enum Design {
     
     enum Colors {
-        static let redColor = UIColor.systemRed
+        static let red = UIColor.systemRed
+        static let green = UIColor.systemGreen
     }
     
     enum Fonts {
@@ -19,6 +20,11 @@ enum Design {
             static let font = UIFont.systemFont(ofSize: 20)
             static let color = UIColor.black
         }
+    }
+    
+    enum Images {
+        static let sun = "sun.max.fill"
+        static let calendar = "calendar"
     }
 }
 
