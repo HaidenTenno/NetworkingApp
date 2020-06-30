@@ -17,6 +17,8 @@ struct CurrentWeather: Codable {
     let visibility: Int
     let wind: Wind
     let clouds: Clouds
+    let rain: Rain?
+    let snow: Snow?
     let dt: Int
     let sys: Sys
     let timezone, id: Int
@@ -70,4 +72,24 @@ struct Weather: Codable {
 // MARK: - Wind
 struct Wind: Codable {
     let speed, deg: Int
+}
+
+// MARK: - Rain
+struct Rain: Codable {
+    let oneH, threeH: Int
+    
+    enum CodingKeys: String, CodingKey {
+        case oneH = "1h"
+        case threeH = "3h"
+    }
+}
+
+// MARK: - Snow
+struct Snow: Codable {
+    let oneH, threeH: Int
+    
+    enum CodingKeys: String, CodingKey {
+        case oneH = "1h"
+        case threeH = "3h"
+    }
 }

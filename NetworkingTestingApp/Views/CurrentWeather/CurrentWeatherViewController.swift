@@ -13,12 +13,28 @@ import CoreLocation
 class CurrentWeatherViewController: UIViewController {
     
     // UI
-    private var tempLabel: UILabel!
+    private var tableView: UITableView!
     private var activityIndicator: UIActivityIndicatorView!
     
     // Services
     private let networkService: NetworkService = NetworkServiceImplementation.shared
     private let locationManager = CLLocationManager()
+    
+    // Table Manager
+    private var tableManager: CurrentWeatherTableViewManager? {
+        didSet {
+            guard tableManager != nil else { return }
+            setupTableManager()
+        }
+    }
+    
+    // View Model
+    private var viewModel: CurrentWeatherViewModel? {
+        didSet {
+            guard let viewModel = viewModel else { return }
+            tableManager = CurrentWeatherTableViewManager(viewModel: viewModel)
+        }
+    }
     
     // Callbacks
     
@@ -46,6 +62,12 @@ class CurrentWeatherViewController: UIViewController {
 // MARK: - Private
 private extension CurrentWeatherViewController {
     
+    private func setupTableManager() {
+        tableView.delegate = tableManager
+        tableView.dataSource = tableManager
+        tableView.reloadData()
+    }
+    
     private func requestLocation() {
         activityIndicator.startAnimating()
         locationManager.requestLocation()
@@ -54,48 +76,56 @@ private extension CurrentWeatherViewController {
     private func loadData(forName name: String) {
         activityIndicator.startAnimating()
         
+        // TODO: Change to callback
         networkService.load(service: CharacterProvider.CurrentWeather.byCityName(name: name), decodeType: CurrentWeather.self) { [weak self] (result) in
-            switch result {
-            case .success(let weather):
-                self?.onDataLoaded(currentWeather: weather)
-            case .failure(let error):
-                self?.onErrorReceived(error: error)
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let weather):
+                    self?.onDataLoaded(currentWeather: weather)
+                case .failure(let error):
+                    #if DEBUG
+                    print(error)
+                    #endif
+                    self?.onErrorReceived(error: error)
+                }
             }
         }
     }
     
     private func loadData(forLatitude latitude: Double, longitude: Double) {
+        activityIndicator.startAnimating()
+        
         networkService.load(service: CharacterProvider.CurrentWeather.byCoordinates(lat: latitude, lon: longitude), decodeType: CurrentWeather.self) { [weak self] (result) in
             switch result {
             case .success(let weather):
                 self?.onDataLoaded(currentWeather: weather)
             case .failure(let error):
+                #if DEBUG
+                print(error)
+                #endif
                 self?.onErrorReceived(error: error)
             }
         }
     }
     
+    // MARK: - Events
     private func onDataLoaded(currentWeather: CurrentWeather) {
-        DispatchQueue.main.async { [weak self] in
-            self?.tempLabel.text = String(describing: currentWeather.main.temp)
-            self?.activityIndicator.stopAnimating()
-        }
+        viewModel = CurrentWeatherViewModel(currentWeatherInfo: currentWeather)
+        activityIndicator.stopAnimating()
     }
     
     private func onErrorReceived(error: NetworkServiceError) {
-        DispatchQueue.main.async { [weak self] in
-            switch error {
-            case .notFound:
-                self?.tempLabel.text = "Not found"
-            default:
-                self?.tempLabel.text = "Error"
-            }
-            self?.activityIndicator.stopAnimating()
+        switch error {
+        case .notFound:
+            print("Not found")
+        default:
+            print("Network error")
         }
+        activityIndicator.stopAnimating()
     }
     
     private func onLocationError() {
-        tempLabel.text = "Location Error"
+        print("Location Error")
         activityIndicator.stopAnimating()
     }
 }
@@ -107,11 +137,14 @@ private extension CurrentWeatherViewController {
         // self
         view.backgroundColor = Design.Colors.red
         
-        // tempLabel
-        tempLabel = UILabel()
-        tempLabel.font = Design.Fonts.RegularText.font
-        tempLabel.textColor = Design.Fonts.RegularText.color
-        view.addSubview(tempLabel)
+        // tableView
+        tableView = UITableView()
+        tableView.backgroundColor = Design.Colors.red
+        tableView.separatorStyle = .none
+        tableView.delaysContentTouches = true
+        view.addSubview(tableView)
+        // register cells
+        tableView.register(CurrentTemperatureTableViewCell.self, forCellReuseIdentifier: Config.IDs.Cells.temperature)
         
         // activityIndicator
         activityIndicator = UIActivityIndicatorView()
@@ -122,15 +155,17 @@ private extension CurrentWeatherViewController {
     }
     
     private func makeConstraints() {
-        // tempLabel
-        tempLabel.snp.makeConstraints { (make) in
-            make.center.equalTo(view.safeAreaLayoutGuide)
+        // tableView
+        tableView.snp.makeConstraints { make in
+            make.top.equalTo(view.safeAreaLayoutGuide)
+            make.left.equalTo(view.safeAreaLayoutGuide)
+            make.right.equalTo(view.safeAreaLayoutGuide)
+            make.bottom.equalTo(view.safeAreaLayoutGuide)
         }
         
         // activityIndicator
         activityIndicator.snp.makeConstraints { (make) in
-            make.centerX.equalTo(view.safeAreaLayoutGuide)
-            make.centerY.equalTo(view.safeAreaLayoutGuide).offset(-50)
+            make.center.equalTo(view.safeAreaLayoutGuide)
         }
     }
 }
@@ -148,14 +183,15 @@ extension CurrentWeatherViewController: CLLocationManagerDelegate {
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         activityIndicator.stopAnimating()
-        guard let location = locations.first else { return }
-//        print(location.coordinate.latitude, location.coordinate.longitude)
+        guard let location = locations.first else { onLocationError(); return }
         loadData(forLatitude: location.coordinate.latitude, longitude: location.coordinate.longitude)
     }
     
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
         activityIndicator.stopAnimating()
-//        print(error)
+        #if DEBUG
+        print(error)
+        #endif
         onLocationError()
     }
 }

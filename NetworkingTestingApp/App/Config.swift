@@ -14,4 +14,11 @@ enum Config {
         static let fileName = "Keys"
         static let apiKey = "Api key"
     }
+    
+    enum IDs {
+        enum Cells {
+            // CurrentWeather
+            static let temperature = "CurrentWeatherTemperatureCell"
+        }
+    }
 }
